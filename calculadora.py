@@ -13,7 +13,6 @@ taxa_mensal = taxa_efetiva / 12
 
 # Plafonds
 plafond_1a = 237_540.00  # 1º plafond de 1ª habitação
-plafond_total = 475_080.00  # Plafond total (soma dos 2 plafonds)
 
 st.set_page_config(page_title="Capacidade de Endividamento", layout="centered")
 st.title("🏡 Calculadora de Capacidade de Endividamento")
@@ -44,14 +43,7 @@ if st.button("Calcular"):
     # Limitar o valor disponível para o 1º plafond a 237.540€
     valor_1p = min(valor_disponivel_1p, plafond_1a)
 
-    # Cálculo do valor do 2º plafond (caso necessário)
-    valor_necessario_2p = max(0, rendimento_bruto - IRS - seguranca_social - seguro_saude)
-    valor_2p = max(0, valor_necessario_2p)
-
-    # Calcular o total disponível para financiamento
-    total_financiamento = valor_1p + valor_2p
-
-    # Cálculo da mensalidade do 1º plafond
+    # Calcular a mensalidade do 1º plafond
     try:
         mensalidade_1p = round(
             valor_1p / ((1 - math.pow(1 + taxa_mensal, -meses_restantes)) / taxa_mensal),
@@ -70,8 +62,5 @@ if st.button("Calcular"):
     st.write(f"💰 **Valor disponível (1º plafond)**: **€ {formatar_moeda(valor_1p)}**")
     st.write(f"💳 **Prestação estimada (1º plafond)**: **€ {formatar_moeda(mensalidade_1p)}**")
 
-    st.markdown("#### ➕ **2º Plafond**")
-    st.write(f"💰 **Valor disponível (2º plafond)**: **€ {formatar_moeda(valor_2p)}**")
-
     st.markdown("### 🏦 **Valor total de financiamento**")
-    st.write(f"💰 **Valor total de financiamento**: **€ {formatar_moeda(total_financiamento)}**")
+    st.write(f"💰 **Valor total de financiamento**: **€ {formatar_moeda(valor_1p)}**")
