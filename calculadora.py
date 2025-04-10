@@ -35,8 +35,8 @@ taxa_juros_efetiva_ano = taxa_juros_original_ano * 0.65
 # Convertendo para taxa mensal
 taxa_juros_mensal = taxa_juros_efetiva_ano / 12  # taxa anual dividida por 12 meses
 
-# Valor disponível para financiamento
-valor_disponivel = st.number_input("Valor disponível para financiamento (€)", min_value=0.0, step=1000.0)
+# Cálculo do valor disponível para financiamento
+valor_disponivel = ((rendimento_bruto * 14) / 24) - seguro_saude + valor_irs + seguranca_social
 
 # Data de nascimento
 data_nasc = st.date_input("Data de nascimento", max_value=date.today())
