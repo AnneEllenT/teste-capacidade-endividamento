@@ -4,7 +4,7 @@ from dateutil.relativedelta import relativedelta
 
 # Função para formatar números com ponto e vírgula e 2 casas decimais
 def formatar_moeda(valor):
-    return f"{valor:,.2f}".replace(",", ";").replace(".", ",")  # Usa f-string para formatação
+    return f"{valor:,.2f}".replace(",", ";").replace(".", ",")
 
 # Layout inicial
 st.set_page_config(page_title="Calculadora de Endividamento", layout="centered")
@@ -65,8 +65,27 @@ else:
     else:
         capacidade_endividamento = renda_liquida * 0.20  # 20% da renda líquida
 
-# Exibir a capacidade de endividamento formatado
-st.write(f"Sua capacidade máxima de endividamento é € {formatar_moeda(capacidade_endividamento)}")
+# Limitação do valor máximo do empréstimo para 1ª e 2ª habitação
+plafond_1a_habitacao = 237540
+plafond_2a_habitacao = 237540
+plafond_maximo = plafond_1a_habitacao + plafond_2a_habitacao  # Total máximo possível é a soma dos dois plafonds
+
+# Cálculo do valor para a 1ª habitação
+valor_1a_habitacao = min(capacidade_endividamento, plafond_1a_habitacao)
+
+# Se o valor de financiamento exceder o plafond da 1ª habitação, calculamos o segundo plafond
+valor_segundo_plafond = max(0, capacidade_endividamento - valor_1a_habitacao)
+
+# Cálculo do valor do segundo plafond (baseado no rendimento bruto menos encargos)
+valor_segundo_plafond = min(valor_segundo_plafond, plafond_2a_habitacao)
+
+# Exibir o valor máximo de financiamento por tipo de habitação
+st.write(f"Para 1ª Habitação, você pode acessar até € {formatar_moeda(valor_1a_habitacao)}.")
+st.write(f"Para 2ª Habitação, você pode acessar até € {formatar_moeda(valor_segundo_plafond)}.")
+
+# Exibir o total de valor disponível para o financiamento
+valor_total_disponivel = valor_1a_habitacao + valor_segundo_plafond
+st.write(f"O valor total disponível para o financiamento é € {formatar_moeda(valor_total_disponivel)}.")
 
 # Cálculo da mensalidade com a fórmula de amortização
 mensalidade = round(valor_disponivel / ((1 - (1 + taxa_juros_mensal) ** (-meses_restantes)) / taxa_juros_mensal), 2)
@@ -76,17 +95,4 @@ if coparticipante:
     mensalidade /= 2
 
 # Exibir a mensalidade formatada
-st.write(f"A sua mensalidade será de € {formatar_moeda(mensalidade)}")
-
-# Cálculo do valor máximo de empréstimo com base na capacidade de endividamento
-valor_maximo = capacidade_endividamento * ((1 - (1 + taxa_juros_mensal) ** (-meses_restantes)) / taxa_juros_mensal)
-
-# Se houver coparticipante, o valor máximo de empréstimo também será ajustado
-if coparticipante:
-    valor_maximo /= 2
-
-# Exibir o valor máximo do empréstimo calculado
-st.write(f"O valor máximo de empréstimo que você pode solicitar é € {formatar_moeda(valor_maximo)}")
-
-# Exibir a taxa de juros mensal efetiva
-st.write(f"A taxa de juros mensal efetiva aplicada é de {round(taxa_juros_mensal * 100, 4)}%")
+st.write(f"A sua mensalidade será de € {formatar_mo
