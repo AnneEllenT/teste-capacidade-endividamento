@@ -85,15 +85,20 @@ if st.button("Calcular"):
     valor_total = valor_1p + valor_2p
     mensalidade_total = mensalidade_1p + mensalidade_2p
 
-    # Resultados
+    # Exibindo resultados corretamente
     st.markdown("### ✅ Resultado")
-    st.write(f"📅 Idade atual: **{idade} anos**")
-    st.write(f"📆 Meses disponíveis até os 70 anos: **{meses_restantes} meses**")
+    st.write(f"📅 **Idade atual**: **{idade} anos**")
+    st.write(f"📆 **Meses disponíveis até os 70 anos**: **{meses_restantes} meses**")
 
-    st.markdown("#### 🧮 1º Plafond")
-    st.write(f"💰 Valor disponível (1º plafond): **€ {formatar_moeda(valor_1p)}**")
-    st.write(f"💳 Prestação estimada (1º plafond): **€ {formatar_moeda(mensalidade_1p)}**")
+    st.markdown("#### 🧮 **1º Plafond**")
+    st.write(f"💰 **Valor disponível (1º plafond)**: **€ {formatar_moeda(valor_1p)}**")
+    st.write(f"💳 **Prestação estimada (1º plafond)**: **€ {formatar_moeda(mensalidade_1p)}**")
 
     if valor_2p > 0:
-        st.markdown("#### ➕ 2º Plafond")
-        st.write
+        st.markdown("#### ➕ **2º Plafond**")
+        st.write(f"💰 **Valor adicional (2º plafond)**: **€ {formatar_moeda(valor_2p)}**")
+        st.write(f"💳 **Prestação adicional (2º plafond)**: **€ {formatar_moeda(mensalidade_2p)}**")
+
+    st.markdown("#### 🧾 **Resultado Total**")
+    st.write(f"🏦 **Valor total de financiamento**: **€ {formatar_moeda(valor_total)}**")
+    st.write(f"💸 **Prestação total estimada**: **€ {formatar_moeda(mensalidade_total)}**")
