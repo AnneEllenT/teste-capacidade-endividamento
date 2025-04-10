@@ -69,4 +69,24 @@ else:
 st.write(f"Sua capacidade máxima de endividamento é € {formatar_moeda(capacidade_endividamento)}")
 
 # Cálculo da mensalidade com a fórmula de amortização
-mensalidade = round(valor_dispon_
+mensalidade = round(valor_disponivel / ((1 - (1 + taxa_juros_mensal) ** (-meses_restantes)) / taxa_juros_mensal), 2)
+
+# Se houver coparticipante, a mensalidade é dividida por 2
+if coparticipante:
+    mensalidade /= 2
+
+# Exibir a mensalidade formatada
+st.write(f"A sua mensalidade será de € {formatar_moeda(mensalidade)}")
+
+# Cálculo do valor máximo de empréstimo com base na capacidade de endividamento
+valor_maximo = capacidade_endividamento * ((1 - (1 + taxa_juros_mensal) ** (-meses_restantes)) / taxa_juros_mensal)
+
+# Se houver coparticipante, o valor máximo de empréstimo também será ajustado
+if coparticipante:
+    valor_maximo /= 2
+
+# Exibir o valor máximo do empréstimo calculado
+st.write(f"O valor máximo de empréstimo que você pode solicitar é € {formatar_moeda(valor_maximo)}")
+
+# Exibir a taxa de juros mensal efetiva
+st.write(f"A taxa de juros mensal efetiva aplicada é de {round(taxa_juros_mensal * 100, 4)}%")
