@@ -1,29 +1,27 @@
 import streamlit as st
 from datetime import datetime
 import math
-import locale
 
-# Define a função de formatação
+# Função para formatar valores com vírgula e duas casas decimais
 def formatar_moeda(valor):
     return f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
-# Taxa de juros anual e mensal efetiva (65% de 2.65%)
-taxa_juros_anual = 2.65 / 100
-taxa_efetiva = taxa_juros_anual * 0.65
+# Taxa de juro: 2.65% * 65%
+taxa_anual = 2.65 / 100
+taxa_efetiva = taxa_anual * 0.65
 taxa_mensal = taxa_efetiva / 12
 
-# Plafonds
-plafond_1a_habitacao = 237540
-plafond_2a_habitacao = 237540
-plafond_total = plafond_1a_habitacao + plafond_2a_habitacao
+# Plafond
+plafond_1a_habitacao = 237_540.00
 
-st.title("🧮 Calculadora de Capacidade de Endividamento")
+st.set_page_config(page_title="Capacidade de Endividamento", layout="centered")
+st.title("🏡 Calculadora de Capacidade de Endividamento")
 
-# Tipo de habitação
+# Seleção de tipo de habitação
 tipo_habitacao = st.selectbox("Para que pretende a simulação?", ["1ª habitação", "2ª habitação"])
 
-# Entrada de dados
-data_nascimento = st.date_input("Data de nascimento (DD-MM-AAAA)", format="DD-MM-YYYY", min_value=datetime(1900, 1, 1), max_value=datetime(2024, 12, 31))
+# Entradas do usuário
+data_nascimento = st.date_input("Data de nascimento (DD-MM-AAAA)", format="DD-MM-YYYY", min_value=datetime(1900, 1, 1))
 rendimento_bruto = st.number_input("Rendimento Bruto (€)", min_value=0.0, step=100.0)
 valor_IRS = st.number_input("Valor de IRS (€)", min_value=0.0, step=10.0)
 seguranca_social = st.number_input("Segurança Social (€)", min_value=0.0, step=10.0)
@@ -32,43 +30,46 @@ outros_encargos = st.number_input("Outros Encargos e Seguros (€)", min_value=0
 coparticipante = st.checkbox("Tem coparticipante?")
 
 if st.button("Calcular"):
-    # Cálculo dos meses disponíveis
-    hoje = datetime.today()
-    idade_atual = hoje.year - data_nascimento.year - ((hoje.month, hoje.day) < (data_nascimento.month, data_nascimento.day))
-    meses_restantes = min((70 - idade_atual) * 12, 480)
 
-    # Valor disponível
+    # Cálculo da idade e meses restantes
+    hoje = datetime.today()
+    idade = hoje.year - data_nascimento.year - ((hoje.month, hoje.day) < (data_nascimento.month, data_nascimento.day))
+    meses_restantes = min((70 - idade) * 12, 480)
+
+    # Cálculo do valor disponível (1/24 avos com encargos)
     valor_disponivel = ((rendimento_bruto * 14) / 24) - sams - valor_IRS - seguranca_social
 
-    # Ajuste por coparticipante
-    encargos_totais = sams + valor_IRS + seguranca_social + outros_encargos
-    if coparticipante:
-        encargos_totais -= (outros_encargos / 2)
+    # Ajustes se houver coparticipante (dividimos os encargos relacionados à habitação)
+    encargos_divididos = outros_encargos / 2 if coparticipante else outros_encargos
 
-    # Mensalidade máxima
+    # Cálculo da mensalidade com base no valor disponível
     try:
-        mensalidade = round(
+        mensalidade_maxima = round(
             valor_disponivel / ((1 - math.pow(1 + taxa_mensal, -meses_restantes)) / taxa_mensal),
             2
         )
-    except ZeroDivisionError:
-        mensalidade = 0
 
-    # Cálculo de valores com regras de plafond
-    valor_1a_habitacao = min((rendimento_bruto * 14) / 24, plafond_1a_habitacao)
-    restante_disponivel = capacidade_restante = valor_disponivel - mensalidade if tipo_habitacao == "1ª habitação" else valor_disponivel
-    valor_2a_habitacao = min(restante_disponivel, plafond_2a_habitacao)
+        # Agora calculamos o valor de financiamento possível com essa mensalidade
+        valor_possivel = mensalidade_maxima * ((1 - math.pow(1 + taxa_mensal, -meses_restantes)) / taxa_mensal)
 
-    # Valor máximo final
-    if tipo_habitacao == "1ª habitação":
-        valor_total = valor_1a_habitacao
-    else:
-        valor_total = valor_2a_habitacao
+        # Aplicamos o limite do plafond
+        valor_financiamento = min(valor_possivel, plafond_1a_habitacao)
 
-    valor_total = min(valor_total, plafond_total)
+        # Se limitou, recalculamos a nova mensalidade com o valor permitido
+        mensalidade_corrigida = round(
+            valor_financiamento / ((1 - math.pow(1 + taxa_mensal, -meses_restantes)) / taxa_mensal),
+            2
+        )
 
-    st.markdown("### 💡 Resultado")
-    st.write(f"Idade atual: {idade_atual} anos")
-    st.write(f"Meses disponíveis até os 70 anos: {meses_restantes} meses")
-    st.write(f"A sua mensalidade será de € {formatar_moeda(mensalidade)}")
-    st.write(f"Valor máximo de financiamento: € {formatar_moeda(valor_total)}")
+    except:
+        mensalidade_maxima = 0
+        valor_financiamento = 0
+        mensalidade_corrigida = 0
+
+    # Resultados
+    st.markdown("### ✅ Resultado")
+    st.write(f"📅 Idade atual: **{idade} anos**")
+    st.write(f"📆 Meses disponíveis até os 70 anos: **{meses_restantes} meses**")
+    st.write(f"💰 Valor disponível para financiamento: **€ {formatar_moeda(valor_disponivel)}**")
+    st.write(f"🏦 Valor máximo de financiamento (com base no plafond): **€ {formatar_moeda(valor_financiamento)}**")
+    st.write(f"💳 Prestação estimada: **€ {formatar_moeda(mensalidade_corrigida)}**")
