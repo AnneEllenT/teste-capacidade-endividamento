@@ -1,14 +1,10 @@
 import streamlit as st
-import locale
 from datetime import date
 from dateutil.relativedelta import relativedelta
 
-# Configuração do local para formatação em Euro (europeu com ponto e vírgula)
-locale.setlocale(locale.LC_ALL, 'pt_PT.UTF-8')  # Para Portugal, ou ajuste conforme o seu local
-
-# Função para formatar números com separador de milhar e 2 casas decimais
+# Função para formatar números com ponto e vírgula e 2 casas decimais
 def formatar_moeda(valor):
-    return locale.format_string('%.2f', valor, grouping=True).replace(',', ';')
+    return f"{valor:,.2f}".replace(",", ";").replace(".", ",")  # Usa f-string para formatação
 
 # Layout inicial
 st.set_page_config(page_title="Calculadora de Endividamento", layout="centered")
@@ -71,3 +67,6 @@ else:
 
 # Exibir a capacidade de endividamento formatado
 st.write(f"Sua capacidade máxima de endividamento é € {formatar_moeda(capacidade_endividamento)}")
+
+# Cálculo da mensalidade com a fórmula de amortização
+mensalidade = round(valor_dispon_
